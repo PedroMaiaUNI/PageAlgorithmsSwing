@@ -2,14 +2,12 @@
 import java.util.*;
 
 public class LRU {
-    private final int memorySize;
     private final List<String> memory;
     private final List<String> queue;
     private final LinkedHashMap<String, Integer> recentUsage = new LinkedHashMap<>();
     private int time = 0;
 
-    public LRU(int memorySize, List<String> initialMemory, List<String> queue) {
-        this.memorySize = memorySize;
+    public LRU(List<String> initialMemory, List<String> queue) {
         this.memory = initialMemory;
         this.queue = queue;
     }

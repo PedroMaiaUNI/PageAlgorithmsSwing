@@ -2,14 +2,12 @@
 import java.util.*;
 
 public class NFU {
-    private final int memorySize;
     private final List<String> memory;
     private final List<String> queue;
     private final Map<String, Integer> usageCounter = new HashMap<>();
     private final int clockInterrupt;
 
-    public NFU(int memorySize, List<String> initialMemory, List<String> queue, int clockInterrupt) {
-        this.memorySize = memorySize;
+    public NFU(List<String> initialMemory, List<String> queue, int clockInterrupt) {
         this.memory = initialMemory;
         this.queue = queue;
         this.clockInterrupt = clockInterrupt;
