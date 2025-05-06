@@ -1,78 +1,98 @@
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class Aging {
-    private final int memorySize;
-    private final List<String> pageQueue;
-    private final int clockInterrupt;
+    LinkedList<Page> memory;
+    LinkedList<Page> queue;
 
-    private Map<String, Integer> agingCounters;
-    private Map<String, Integer> referenceBits;
-    private List<String> memory;
+    int memorySize;
+    int pageFaults;
+    int clockInterrupt;
 
-    public Aging(int memorySize, List<String> initialMemory, List<String> pageQueue, int clockInterrupt) {
-        this.memorySize = memorySize;
-        this.pageQueue = pageQueue;
+    Map<String, Boolean> referenceBits;
+    Map<String, Integer> pageBytes;
+
+    public Aging(LinkedList<Page> initialMemory, LinkedList<Page> queue, int clockInterrupt) {
+        this.memory = new LinkedList<>(initialMemory);
+        this.queue = new LinkedList<>(queue);
+        this.pageFaults = 0;
+        this.memorySize = initialMemory.size();
         this.clockInterrupt = clockInterrupt;
-        
-        this.agingCounters = new HashMap<>();
+
         this.referenceBits = new HashMap<>();
-        this.memory = new ArrayList<>(initialMemory);
+        this.pageBytes = new HashMap<>();
+
+        memory.forEach( (page) ->  {referenceBits.put(page.name, false);
+                                    pageBytes.put(page.name, 0);}); 
     }
 
-    public int run() {
-        int faults = 0;
-        int instructionsSinceLastInterrupt = 0;
+    public void pageToReplace(){
+        Page toReplace = memory.getFirst();
+        int minCounter = pageBytes.getOrDefault(toReplace.name, 0);
+        for(Page page : memory){
+            int counter = pageBytes.getOrDefault(page.name, 0);
+            if(counter < minCounter){
+                toReplace = page;
+            }
+        }
+        memory.remove(toReplace);
+    }
 
-        for (String page : pageQueue) {
-            // Página está na memória
-            if (memory.contains(page)) {
-                referenceBits.put(page, 1); // Referenciada
-            } else {
-                faults++;
-                // Substituição se memória cheia
-                if (memory.size() >= memorySize) {
-                    String pageToReplace = findPageToReplace();
-                    memory.remove(pageToReplace);
-                    agingCounters.remove(pageToReplace);
-                    referenceBits.remove(pageToReplace);
+    public boolean findByName(LinkedList<Page> memory, Page page){
+        for(Page compare : memory){
+            if(compare.equals(page)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void checkEmptiness(){
+        memory.removeIf(p -> p.name.equals("0"));
+    }
+
+    public void run(){
+        int refCount = 0;
+        checkEmptiness();
+
+        for (Page page : queue){
+            refCount++;
+            referenceBits.put(page.name, true);
+
+            if(!findByName(memory, page)){
+                pageFaults++;
+
+                if(memory.size() >= memorySize){
+                    pageToReplace();
                 }
                 memory.add(page);
-                agingCounters.put(page, 0);
-                referenceBits.put(page, 1);
+
+                pageBytes.putIfAbsent(page.name, 0);
             }
 
-            instructionsSinceLastInterrupt++;
+            if (refCount == clockInterrupt){
+                refCount = 0;
+                for (String p : pageBytes.keySet()) {
+                    boolean R = referenceBits.getOrDefault(p, false);
+                    int counter = pageBytes.getOrDefault(p, 0);
+                    counter >>= 1;
 
-            // Atualização periódica
-            if (instructionsSinceLastInterrupt == clockInterrupt) {
-                updateAgingCounters();
-                instructionsSinceLastInterrupt = 0;
+                    if(R){
+                        //adiciona 1 ao bit mais significante
+                        counter |= 0b10000000;
+                    }
+                    referenceBits.put(p, false);
+                    pageBytes.put(p, counter);
+                }
             }
-        }
-
-        return faults;
-    }
-
-    private void updateAgingCounters() {
-        for (String page : memory) {
-            int counter = agingCounters.getOrDefault(page, 0);
-            int refBit = referenceBits.getOrDefault(page, 0);
-            counter = (counter >>> 1) | (refBit << 7); // shift right, insert ref bit at MSB
-            agingCounters.put(page, counter);
-            referenceBits.put(page, 0); // limpa o bit de referência
-        }
-    }
-
-    private String findPageToReplace() {
-        String victim = null;
-        int min = Integer.MAX_VALUE;
-        for (String page : memory) {
-            int counter = agingCounters.getOrDefault(page, 0);
-            if (counter < min) {
-                min = counter;
-                victim = page;
+            for (Page p : memory) {
+                System.out.println(p.name.equals("0") ? "_" : p.name);
+                System.out.println("counter: " + Integer.toBinaryString(pageBytes.getOrDefault(p.name, 0)));
             }
+            System.out.println("--------\n");
         }
-        return victim;
+
+        System.out.println("FIM DO AGING");
     }
 }
