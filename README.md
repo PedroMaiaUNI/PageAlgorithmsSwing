@@ -43,6 +43,37 @@ O simulador foi implementado em **Java com interface Swing**, permitindo a inser
 
 ---
 
+## ▶️ Como Executar o Simulador
+
+### 🧪 Executando pelo Código (IDE como IntelliJ ou Eclipse)
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/PedroMaiaUNI/PageAlgorithmsSwing.git
+   cd PageAlgorithmsSwing
+   ```
+
+2. Abra o projeto em sua IDE Java favorita.
+
+3. Compile e execute a classe SimulatorUI.java.
+
+> Certifique-se de que o JDK 17 ou superior esteja instalado.
+
+### 📦 Executando via Release (.jar)
+
+1. Acesse a aba [Releases](https://github.com/PedroMaiaUNI/PageAlgorithmsSwing/releases) no repositório.
+
+2. Baixe o arquivo `.jar` mais recente.
+
+3. Execute com o seguinte comando:
+   ```bash
+   java -jar SimulatorPageAlgorithms.jar
+    ```
+
+> É necessário ter o Java instalado e configurado no sistema.
+
+---
+
 ## ⚙️ Metodologia
 
 - O simulador recebe como entrada:
