@@ -1,11 +1,6 @@
 import java.util.LinkedList;
 
-public class LRU {
-    LinkedList<Page> memory;
-    LinkedList<Page> queue;
-
-    int memorySize;
-    int pageFaults;
+public class LRU extends PageAlgorithm{
 
     LinkedList<Page> usageHistory;
 
@@ -21,6 +16,7 @@ public class LRU {
         }
     }
 
+    @Override
     public void pageToReplace(){
         //TIRA O MAIS ANTIGO DA PILHA (FUNDO DA PILHA)
         //USA EQUALS PARA COMPARAR QUAL É O ELEMENTO NA MEMORIA CORRESPONDENTE
@@ -34,25 +30,20 @@ public class LRU {
         }
     }
 
-    public boolean findByName(LinkedList<Page> memory, Page page){
-        for(Page compare : memory){
-            if(compare.name.equals(page.name)){
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void updateUsageHistory(Page page) {
         //remover da pilha para recolocar no topo
         usageHistory.removeIf(p -> p.name.equals(page.name));
         usageHistory.add(page);
     }
 
-    public void checkEmptiness(){
-        memory.removeIf(p -> p.name.equals("0"));
+    public void debug(){
+        for(Page p : memory){
+            System.out.println(p.name.equals("0") ? "_" : p.name);
+        }
+        System.out.println("--------\n");
     }
 
+    @Override
     public void run() {
         checkEmptiness();
 
@@ -74,10 +65,6 @@ public class LRU {
                 }  
                 memory.add(page);
             }
-            for(Page p : memory){
-                System.out.println(p.name.equals("0") ? "_" : p.name);
-            }
-            System.out.println("--------\n");
             updateUsageHistory(page);
         }
         System.out.println("FIM DO LRU");

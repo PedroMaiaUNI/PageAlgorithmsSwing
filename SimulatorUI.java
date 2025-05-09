@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class SimulatorUI extends JFrame {
+    private JTextField memorySizeField;
     private JTextField memoryField;
     private JTextField queueField;
     private JTextField interruptField;
@@ -12,12 +13,22 @@ public class SimulatorUI extends JFrame {
 
     public SimulatorUI() {
         setTitle("Simulador de Substituição de Páginas");
-        setSize(600, 400);
+        setSize(600, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        setLocationRelativeTo(null); // Centraliza na tela
+
+        // Painel principal com BoxLayout para centralização vertical
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
         // Painel de entrada
-        JPanel inputPanel = new JPanel(new GridLayout(4, 2, 5, 5));
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));
+
+        inputPanel.add(new JLabel("Tamanho da Memória:"));
+        memorySizeField = new JTextField();
+        memorySizeField.addActionListener(e -> autoFillMemory());
+        inputPanel.add(memorySizeField);
 
         inputPanel.add(new JLabel("Memória Inicial (ex: A,B,C):"));
         memoryField = new JTextField();
@@ -35,15 +46,35 @@ public class SimulatorUI extends JFrame {
         runButton.addActionListener(this::runSimulation);
         inputPanel.add(runButton);
 
-        add(inputPanel, BorderLayout.NORTH);
+        mainPanel.add(inputPanel);
 
-        // Área de saída
-        resultArea = new JTextArea();
+        // Área de resultado
+        resultArea = new JTextArea(10, 50);
         resultArea.setEditable(false);
+        resultArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         JScrollPane scrollPane = new JScrollPane(resultArea);
-        add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(Box.createVerticalStrut(20));
+        mainPanel.add(scrollPane);
 
+        add(mainPanel);
         setVisible(true);
+    }
+
+    private void autoFillMemory() {
+        try {
+            int size = Integer.parseInt(memorySizeField.getText().trim());
+            if (size <= 0) return;
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < size; i++) {
+                sb.append("0");
+                if (i < size - 1) sb.append(",");
+            }
+            memoryField.setText(sb.toString());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Tamanho inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void runSimulation(ActionEvent e) {

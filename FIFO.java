@@ -1,11 +1,6 @@
 import java.util.LinkedList;
 
-public class FIFO {
-    LinkedList<Page> memory;
-    LinkedList<Page> queue;
-
-    int memorySize;
-    int pageFaults;
+public class FIFO extends PageAlgorithm {
 
     public FIFO(LinkedList<Page> initialMemory, LinkedList<Page> queue) {
         this.memory = new LinkedList<>(initialMemory);
@@ -14,23 +9,20 @@ public class FIFO {
         this.memorySize = initialMemory.size();
     }
 
-    public boolean findByName(LinkedList<Page> memory, Page page){
-        for(Page compare : memory){
-            if(compare.equals(page)){
-                return true;
-            }
-        }
-        return false;
-    }
-
+    @Override
     public void pageToReplace(){
         memory.poll();
     }
 
-    public void checkEmptiness(){
-        memory.removeIf(p -> p.name.equals("0"));
+    @Override
+    public void debug(){
+        for(Page p : memory){
+            System.out.println(p.name.equals("0") ? "_" : p.name);
+        }
+        System.out.println("--------\n");
     }
 
+    @Override
     public void run(){
         checkEmptiness();
 
@@ -45,10 +37,7 @@ public class FIFO {
                 }
                 memory.add(page);  
             }
-            for(Page p : memory){
-                System.out.println(p.name.equals("0") ? "_" : p.name);
-            }
-            System.out.println("--------\n");
+            debug();
         }
         System.out.println("FIM DO FIFO");
     }

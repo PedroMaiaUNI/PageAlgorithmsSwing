@@ -2,12 +2,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class NFU {
-    LinkedList<Page> memory;
-    LinkedList<Page> queue;
-
-    int memorySize;
-    int pageFaults;
+public class NFU extends PageAlgorithm{
     int clockInterrupt;
 
     //no momento sou incapaz de raciocionar como fazer isso certo...
@@ -30,6 +25,7 @@ public class NFU {
                                     }); 
     }
 
+    @Override
     public void pageToReplace(){
         //como na implementação de NFU, em caso de empate de counter um slot aleatorio é escolhido para ser subsituído
         //escolhi que seria melhor implementar um "FIFO" como critério de desempate
@@ -44,19 +40,17 @@ public class NFU {
         memory.remove(toReplace);
     }
 
-    public boolean findByName(LinkedList<Page> memory, Page page){
-        for(Page compare : memory){
-            if(compare.equals(page)){
-                return true;
-            }
+    @Override
+    public void debug(){
+        for(Page p : memory){
+            System.out.println(p.name.equals("0") ? "_" : p.name);
+            System.out.println("contador da pagina: " + pageCounters.get(p.name));
         }
-        return false;
+        System.out.println("pagefaults: " + pageFaults);
+        System.out.println("--------\n");
     }
 
-    public void checkEmptiness(){
-        memory.removeIf(p -> p.name.equals("0"));
-    }
-
+    @Override
     public void run(){
         int refCount = 0;
         checkEmptiness();
@@ -75,14 +69,7 @@ public class NFU {
 
                 pageCounters.putIfAbsent(page.name, 0);
             }
-            //debug
-            for(Page p : memory){
-                System.out.println(p.name.equals("0") ? "_" : p.name);
-                System.out.println("contador da pagina: " + pageCounters.get(p.name));
-            }
-            System.out.println("pagefaults: " + pageFaults);
-            System.out.println("--------\n");
-            //fim debug
+            debug();
 
             //atualização do contador
             //a cada interrupção de clock

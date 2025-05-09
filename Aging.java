@@ -1,13 +1,10 @@
+
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class Aging {
-    LinkedList<Page> memory;
-    LinkedList<Page> queue;
-
-    int memorySize;
-    int pageFaults;
+public class Aging extends PageAlgorithm{
     int clockInterrupt;
 
     Map<String, Boolean> referenceBits;
@@ -27,6 +24,7 @@ public class Aging {
                                     pageBytes.put(page.name, 0);}); 
     }
 
+    @Override
     public void pageToReplace(){
         Page toReplace = memory.getFirst();
         int minCounter = pageBytes.getOrDefault(toReplace.name, 0);
@@ -39,19 +37,16 @@ public class Aging {
         memory.remove(toReplace);
     }
 
-    public boolean findByName(LinkedList<Page> memory, Page page){
-        for(Page compare : memory){
-            if(compare.equals(page)){
-                return true;
-            }
+    @Override
+    public void debug(){
+        for (Page p : memory) {
+            System.out.println(p.name.equals("0") ? "_" : p.name);
+            System.out.println("counter: " + Integer.toBinaryString(pageBytes.getOrDefault(p.name, 0)));
         }
-        return false;
+        System.out.println("--------\n");
     }
 
-    public void checkEmptiness(){
-        memory.removeIf(p -> p.name.equals("0"));
-    }
-
+    @Override
     public void run(){
         int refCount = 0;
         checkEmptiness();
@@ -71,6 +66,8 @@ public class Aging {
                 pageBytes.putIfAbsent(page.name, 0);
             }
 
+            debug();
+
             if (refCount == clockInterrupt){
                 refCount = 0;
                 for (String p : pageBytes.keySet()) {
@@ -86,11 +83,6 @@ public class Aging {
                     pageBytes.put(p, counter);
                 }
             }
-            for (Page p : memory) {
-                System.out.println(p.name.equals("0") ? "_" : p.name);
-                System.out.println("counter: " + Integer.toBinaryString(pageBytes.getOrDefault(p.name, 0)));
-            }
-            System.out.println("--------\n");
         }
 
         System.out.println("FIM DO AGING");
